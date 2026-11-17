@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CogniGrade Pro • Student Performance Suite</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================================
+       1. DYNAMIC THEME SYSTEM (Night Light & Day Light Modes)
+       ========================================================================= */
+    :root[data-theme="dark"] {
+      --bg: #030712;
+      --glass-surface: rgba(255, 255, 255, 0.04);
+      --glass-surface-hover: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-specular: rgba(255, 255, 255, 0.35);
+      --glass-box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      --cyan: #00f2fe;
+      --indigo: #4facfe;
+      --green: #00f5a0;
+      --amber: #f6d365;
+      --red: #ff5252;
+      --text-pri: #f9fafb;
+      --text-sec: #9ca3af;
+      --orb-opacity: 0.55;
+      --input-bg: rgba(255, 255, 255, 0.05);
+      --subcard-bg: rgba(255, 255, 255, 0.03);
+      --table-border: rgba(255, 255, 255, 0.08);
+      --table-header-bg: #0a1124;
+      --chip-bg: rgba(255, 255, 255, 0.06);
+    }
+
+    :root[data-theme="light"] {
+      --bg: #edf2f9;
+      --glass-surface: rgba(255, 255, 255, 0.65);
+      --glass-surface-hover: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.9);
+      --glass-specular: rgba(255, 255, 255, 1);
+      --glass-box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      --cyan: #0284c7;
+      --indigo: #4338ca;
+      --green: #059669;
+      --amber: #d97706;
+      --red: #dc2626;
+      --text-pri: #0f172a;
+      --text-sec: #475569;
+      --orb-opacity: 0.35;
+      --input-bg: rgba(255, 255, 255, 0.85);
+      --subcard-bg: rgba(255, 255, 255, 0.6);
+      --table-border: rgba(15, 23, 42, 0.1);
+      --table-header-bg: #e2e8f0;
+      --chip-bg: rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-pri);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Liquid Orbs */
+    .orb-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: var(--orb-opacity); animation: floatMotion 22s infinite alternate ease-in-out; }
+    .orb-1 { width: 620px; height: 620px; background: radial-gradient(circle, #00f2fe, #4facfe); top: -200px; left: -150px; }
+    .orb-2 { width: 580px; height: 580px; background: radial-gradient(circle, #7928ca, #ff0080); bottom: -180px; right: -150px; animation-duration: 26s; }
+    .orb-3 { width: 450px; height: 450px; background: radial-gradient(circle, #00f5a0, #0072ff); top: 35%; left: 35%; animation-duration: 18s; }
+    @keyframes floatMotion {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 40px) scale(1.06); }
+    }
+
+    .app-shell { width: 100%; max-width: 1320px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Glass Header */
+    .glass-header {
+      background: var(--glass-surface);
+      backdrop-filter: blur(40px) saturate(190%);
+      -webkit-backdrop-filter: blur(40px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 18px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--glass-box-shadow), inset 0 1px 1px var(--glass-specular);
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 14px; }
+    .brand-badge {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--cyan), var(--indigo));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff; font-size: 1.25rem;
+      box-shadow: 0 0 24px rgba(0, 242, 254, 0.45);
+    }
+    .brand-wrap h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
+    .brand-wrap p { font-size: 0.74rem; color: var(--text-sec); }
+    
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pill-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-pri);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      backdrop-filter: blur(10px);
+    }
+    .pill-btn:hover { background: var(--glass-surface-hover); border-color: var(--cyan); }
+    
+    .theme-toggle-btn {
+      background: linear-gradient(135deg, var(--cyan), var(--indigo));
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 14px rgba(0, 242, 254, 0.35);
+    }
+
+    .auth-badge-btn {
+      background: rgba(0, 245, 160, 0.15);
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .file-input { display: none; }
+
+    /* KPI Summary Row */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .kpi-card {
+      background: var(--glass-surface);
+      backdrop-filter: blur(35px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 18px 22px;
+      box-shadow: var(--glass-box-shadow);
+      position: relative;
+    }
+    .kpi-card:hover { transform: translateY(-3px); border-color: var(--glass-specular); }
+    .kpi-card h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-sec); margin-bottom: 6px; }
+    .kpi-card .val { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; }
+
+    /* Tabbed Navigation */
+    .tab-bar {
+      display: flex; gap: 8px;
+      background: var(--glass-surface);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 6px;
+      backdrop-filter: blur(25px);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      min-width: 190px;
+      padding: 12px 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-sec);
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08));
+      border: 1px solid var(--glass-specular);
+      color: var(--text-pri);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* Portal Panels */
+    .view-panel { display: none; flex-direction: column; gap: 20px; }
+    .view-panel.active { display: flex; }
+
+    .glass-box {
+      background: var(--glass-surface);
+      backdrop-filter: blur(35px);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: var(--glass-box-shadow);
+    }
+
+    .section-title {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--glass-border);
+      flex-wrap: wrap; gap: 8px;
+    }
+    .section-title h2 { font-size: 1.15rem; font-weight: 700; }
+    .section-title span { font-size: 0.76rem; color: var(--text-sec); }
+
+    /* Inputs & Buttons */
+    .search-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .glass-input, .glass-select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 11px 14px;
+      color: var(--text-pri);
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .glass-select option { background: var(--bg); color: var(--text-pri); }
+    .glass-input:focus, .glass-select:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(0,242,254,0.3); }
+    
+    .liquid-btn {
+      background: linear-gradient(135deg, var(--cyan), var(--indigo));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 22px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 242, 254, 0.35);
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .liquid-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .liquid-btn-secondary {
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-pri);
+      box-shadow: none;
+    }
+
+    /* Student Dossier */
+    .student-dossier {
+      display: none;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      margin-top: 10px;
+    }
+    @media(max-width: 860px) { .student-dossier { grid-template-columns: 1fr; } }
+
+    .sub-card {
+      background: var(--subcard-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .marks-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    .marks-table th {
+      text-align: left; padding: 10px 12px; color: var(--text-sec);
+      border-bottom: 1px solid var(--table-border); font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .marks-table td {
+      padding: 11px 12px; border-bottom: 1px solid var(--table-border);
+      vertical-align: middle;
+    }
+
+    .status-banner {
+      padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.82rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .status-danger { background: rgba(255, 82, 82, 0.15); border: 1px solid var(--red); color: var(--red); }
+    .status-ok { background: rgba(0, 245, 160, 0.15); border: 1px solid var(--green); color: var(--green); }
+
+    /* Teacher Slots Grid */
+    .teacher-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .teacher-slot {
+      background: var(--subcard-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .teacher-slot:hover {
+      background: var(--glass-surface-hover);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+    .teacher-slot.active {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.18), rgba(79, 172, 254, 0.06));
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.35);
+    }
+    .teacher-slot-header { display: flex; justify-content: space-between; align-items: center; }
+    .teacher-slot-badge {
+      font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;
+      color: var(--text-sec); background: var(--chip-bg);
+      padding: 2px 7px; border-radius: 6px;
+    }
+    .teacher-slot-name { font-size: 0.94rem; font-weight: 700; color: var(--text-pri); margin-top: 2px; }
+    .teacher-slot-dept { font-size: 0.75rem; color: var(--cyan); }
+    .teacher-slot-exp { font-size: 0.72rem; color: var(--green); font-weight: 600; }
+
+    /* Allocated Wards & Table Lists */
+    .alloc-list { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
+    .alloc-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: var(--subcard-bg); border: 1px solid var(--glass-border);
+      border-radius: 12px; font-size: 0.82rem;
+    }
+
+    /* Faculty Directory Grid */
+    .faculty-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .faculty-tile {
+      background: var(--subcard-bg); border: 1px solid var(--glass-border);
+      border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .fac-exp-tag {
+      align-self: flex-start; font-size: 0.7rem; font-weight: 700; padding: 4px 8px;
+      border-radius: 8px; background: rgba(0, 242, 254, 0.12); border: 1px solid var(--cyan); color: var(--cyan);
+    }
+
+    /* =========================================================================
+       PROPERLY ALIGNED 4TH PORTAL: STUDENT RECORDS MANAGER
+       ========================================================================= */
+    .crud-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media(max-width: 980px) { .crud-grid { grid-template-columns: 1fr; } }
+
+    .crud-form-card {
+      background: var(--subcard-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 0.74rem; font-weight: 700; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* 5-Subject Aligned Input Grid */
+    .marks-input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .mark-sub-item { display: flex; flex-direction: column; gap: 4px; }
+    .mark-sub-item.full-width { grid-column: span 2; }
+    .mark-sub-label { font-size: 0.7rem; color: var(--text-sec); font-weight: 600; }
+
+    /* Aligned Records Table Container */
+    .records-table-container {
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      background: var(--subcard-bg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-scroll-wrap {
+      max-height: 520px;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    .styled-records-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      text-align: left;
+    }
+
+    .styled-records-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--table-header-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 3;
+      padding: 12px 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--glass-border);
+      white-space: nowrap;
+    }
+
+    .styled-records-table tbody tr {
+      border-bottom: 1px solid var(--table-border);
+      transition: background-color 0.15s ease;
+    }
+    .styled-records-table tbody tr:hover {
+      background-color: var(--glass-surface-hover);
+    }
+
+    .styled-records-table td {
+      padding: 12px 14px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    /* Fixed alignment columns */
+    .col-roll { width: 70px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--cyan); }
+    .col-name { font-weight: 700; color: var(--text-pri); }
+    .col-avg { width: 90px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    .col-status { width: 110px; }
+    .col-mentor { color: var(--text-sec); font-size: 0.78rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+    .col-actions { width: 140px; text-align: right; }
+
+    .action-group {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .action-icon-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-pri);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .action-icon-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .action-icon-btn.delete-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* Teacher Auth Modal */
+    .auth-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 16px;
+    }
+    .auth-modal-backdrop.active { display: flex; }
+
+    .auth-modal {
+      width: 100%;
+      max-width: 420px;
+      background: var(--glass-surface);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px var(--glass-specular);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .auth-modal h3 { font-size: 1.25rem; font-weight: 800; }
+    .auth-modal p { font-size: 0.8rem; color: var(--text-sec); }
+    .auth-error {
+      color: var(--red);
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Caustic Orbs -->
+  <div class="orb-canvas">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="app-shell">
+    
+    <!-- Top Glass Header -->
+    <header class="glass-header">
+      <div class="brand-wrap">
+        <div class="brand-badge">CG</div>
+        <div>
+          <h1>CogniGrade Pro • Student Performance Suite</h1>
+          <p id="dataSourceLabel">Status: 78 Students & 10 Faculty Active</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Faculty Auth Status Badge -->
+        <button id="authHeaderBtn" class="pill-btn" onclick="handleAuthBtnClick()">
+          <span id="authHeaderIcon">🔒</span> <span id="authHeaderText">Faculty Login</span>
+        </button>
+
+        <!-- Day / Night Light Theme Switcher -->
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span> <span id="themeText">Day Light</span>
+        </button>
+
+        <!-- CSV File Loaders -->
+        <input type="file" id="studentFileInput" class="file-input" accept=".csv" onchange="handleStudentCSV(event)" />
+        <input type="file" id="teacherFileInput" class="file-input" accept=".csv" onchange="handleTeacherCSV(event)" />
+        
+        <button class="pill-btn" onclick="document.getElementById('studentFileInput').click()">
+          <span>📂</span> Load CSV
+        </button>
+        <button class="pill-btn" onclick="exportStudentsCSV()">
+          <span>📥</span> Save CSV
+        </button>
+      </div>
+    </header>
+
+    <!-- KPI Summary Row -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <h4>Total Cohort Enrolled</h4>
+        <div class="val" id="kpiTotal">78</div>
+      </div>
+      <div class="kpi-card">
+        <h4>Cohort Marks Average</h4>
+        <div class="val" style="color:var(--cyan)" id="kpiAvg">--</div>
+      </div>
+      <div class="kpi-card">
+        <h4>Mentorship Required</h4>
+        <div class="val" style="color:var(--red)" id="kpiMentorship">--</div>
+      </div>
+      <div class="kpi-card">
+        <h4>Active Faculty Mentors</h4>
+        <div class="val" style="color:var(--green)">10 Mentors</div>
+      </div>
+    </div>
+
+    <!-- Mode Selector Tabs (4 Portals) -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('studentView', this)">
+        <span>🎓</span> Student Mark List Lookup
+      </button>
+      <button class="tab-btn" onclick="handleProtectedTab('teacherPortal', this)">
+        <span>👨‍🏫</span> Faculty Allocation Slots
+      </button>
+      <button class="tab-btn" onclick="switchTab('facultyDirectory', this)">
+        <span>📋</span> Faculty Directory
+      </button>
+      <button class="tab-btn" onclick="handleProtectedTab('crudPortal', this)">
+        <span>⚙️</span> Student Records Manager 🔒
+      </button>
+    </nav>
+
+    <!-- ====== 1. STUDENT SEARCH & MARKS VIEW (PUBLIC) ====== -->
+    <main id="studentView" class="view-panel active">
+      <section class="glass-box">
+        <div class="section-title">
+          <h2>Student Mark List & Mentorship Engine</h2>
+          <span>Search by Roll No (e.g. 1 to 78) or Name</span>
+        </div>
+
+        <div class="search-row">
+          <input id="studSearchInput" class="glass-input" placeholder="Enter Roll Number or Name..." value="6" />
+          <button class="liquid-btn" onclick="searchStudent()">
+            <span>🔍</span> Find Student Dossier
+          </button>
+        </div>
+
+        <!-- Student Results Dossier -->
+        <div id="studentDossier" class="student-dossier">
+          <div class="sub-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <h3 id="resStudName" style="font-size:1.15rem; font-weight:800;">--</h3>
+                <p id="resStudRoll" style="color:var(--cyan); font-family:'JetBrains Mono',monospace; font-size:0.82rem;">--</p>
+              </div>
+              <div id="resStudAvg" style="font-size:1.5rem; font-weight:800;">--%</div>
+            </div>
+
+            <table class="marks-table">
+              <thead>
+                <tr>
+                  <th>Course Title</th>
+                  <th>Score (/100)</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody id="resMarksBody"></tbody>
+            </table>
+
+            <div id="resMentorshipBanner" class="status-banner"></div>
+          </div>
+
+          <!-- Assigned Teacher Dossier -->
+          <div class="sub-card">
+            <h4 style="text-transform:uppercase; font-size:0.72rem; color:var(--text-sec); letter-spacing:0.08em;">Assigned Faculty Mentor</h4>
+            
+            <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
+              <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,var(--cyan),var(--indigo)); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:1.2rem;" id="resFacAvatar">DR</div>
+              <div>
+                <h3 id="resFacName" style="font-size:1.05rem; font-weight:700;">--</h3>
+                <p id="resFacDesig" style="color:var(--text-sec); font-size:0.8rem;">--</p>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px;">
+              <div style="background:var(--chip-bg); padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border);">
+                <div style="font-size:0.7rem; color:var(--text-sec)">Experience</div>
+                <div style="font-weight:700; color:var(--cyan)" id="resFacExp">--</div>
+              </div>
+              <div style="background:var(--chip-bg); padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border);">
+                <div style="font-size:0.7rem; color:var(--text-sec)">Cabin / Lab</div>
+                <div style="font-weight:700" id="resFacCabin">--</div>
+              </div>
+            </div>
+
+            <div style="background:var(--chip-bg); padding:10px 12px; border-radius:12px; border:1px solid var(--glass-border); font-size:0.8rem;">
+              <div style="color:var(--text-sec)">Mentorship Channel</div>
+              <div id="resFacEmail" style="font-family:'JetBrains Mono',monospace; margin-top:2px;">--</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== 2. 10 TEACHER SLOTS & ALLOCATED WARDS ====== -->
+    <main id="teacherPortal" class="view-panel">
+      <section class="glass-box">
+        <div class="section-title">
+          <h2>Faculty Mentorship Slots (Click any teacher's name)</h2>
+          <span>Tap on any teacher below to view their data and all assigned students</span>
+        </div>
+
+        <div class="teacher-slots-grid" id="teacherSlotsContainer"></div>
+
+        <div id="teacherResultArea" style="display:flex; flex-direction:column; gap:16px;">
+          <div style="background:var(--subcard-bg); border:1px solid var(--glass-border); border-radius:16px; padding:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <h3 id="tAllocName" style="font-size:1.15rem; font-weight:700;">--</h3>
+                <span id="tAllocExpBadge" style="font-size:0.72rem; padding:3px 8px; border-radius:6px; background:rgba(0,242,254,0.15); color:var(--cyan); font-weight:700;">-- Yrs Exp</span>
+              </div>
+              <p id="tAllocMeta" style="color:var(--text-sec); font-size:0.82rem; margin-top:4px;">--</p>
+              <p id="tAllocContact" style="color:var(--text-sec); font-family:'JetBrains Mono',monospace; font-size:0.75rem; margin-top:2px;">--</p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.72rem; color:var(--text-sec); text-transform:uppercase;">Assigned Wards</div>
+              <div id="tAllocCount" style="font-size:1.5rem; font-weight:800; color:var(--green)">-- Students</div>
+            </div>
+          </div>
+
+          <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--text-sec); letter-spacing:0.06em;">Allocated Students List</h4>
+          <div class="alloc-list" id="allocatedStudentsList"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== 3. 10 FACULTY DIRECTORY & EXPERIENCE ====== -->
+    <main id="facultyDirectory" class="view-panel">
+      <section class="glass-box">
+        <div class="section-title">
+          <h2>Faculty Mentors Directory (10 Teachers)</h2>
+          <span>Department Mentors, Academic Background & Years of Experience</span>
+        </div>
+
+        <div class="faculty-grid" id="facultyGridList"></div>
+      </section>
+    </main>
+
+    <!-- ====== 4. SEPARATE PORTAL: STUDENT RECORDS MANAGER (PROPERLY ALIGNED) ====== -->
+    <main id="crudPortal" class="view-panel">
+      <section class="glass-box" id="crudContentArea">
+        <div class="section-title">
+          <div>
+            <h2>Student Records Manager</h2>
+            <span>Add New Students, Modify Existing Grades, or Remove Records</span>
+          </div>
+          <span style="font-size: 0.72rem; font-weight: 700; color: var(--green); background: rgba(0, 245, 160, 0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--green);">
+            ● Authorized Faculty Mode
+          </span>
+        </div>
+
+        <div class="crud-grid">
+          
+          <!-- Left: Structured Form Card -->
+          <div class="crud-form-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--table-border); padding-bottom: 10px;">
+              <h3 id="formModeTitle" style="font-size:0.95rem; font-weight:700;">Add New Student</h3>
+              <span id="editModeIndicator" style="display:none; font-size:0.7rem; color:var(--cyan); font-weight:700;">EDITING ACTIVE</span>
+            </div>
+            
+            <input type="hidden" id="editOriginalRoll" value="" />
+
+            <div class="form-group">
+              <label class="form-label">Roll Number</label>
+              <input id="formRollNo" class="glass-input" placeholder="e.g. 79" type="text" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Student Full Name</label>
+              <input id="formName" class="glass-input" placeholder="e.g. Rohini S." type="text" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Assigned Faculty Mentor</label>
+              <select id="formMentorSelect" class="glass-select"></select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Subject Marks (0 - 100)</label>
+              <div class="marks-input-grid">
+                <div class="mark-sub-item">
+                  <span class="mark-sub-label">Mathematics</span>
+                  <input id="formM1" class="glass-input" placeholder="0-100" type="number" min="0" max="100" />
+                </div>
+                <div class="mark-sub-item">
+                  <span class="mark-sub-label">Data Structures</span>
+                  <input id="formM2" class="glass-input" placeholder="0-100" type="number" min="0" max="100" />
+                </div>
+                <div class="mark-sub-item">
+                  <span class="mark-sub-label">Computer Networks</span>
+                  <input id="formM3" class="glass-input" placeholder="0-100" type="number" min="0" max="100" />
+                </div>
+                <div class="mark-sub-item">
+                  <span class="mark-sub-label">Database Systems</span>
+                  <input id="formM4" class="glass-input" placeholder="0-100" type="number" min="0" max="100" />
+                </div>
+                <div class="mark-sub-item full-width">
+                  <span class="mark-sub-label">Operating Systems</span>
+                  <input id="formM5" class="glass-input" placeholder="0-100" type="number" min="0" max="100" />
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:8px;">
+              <button class="liquid-btn" id="saveStudentBtn" onclick="saveStudentRecord()" style="flex:1;">
+                <span>💾</span> Save Record
+              </button>
+              <button class="liquid-btn liquid-btn-secondary" id="cancelEditBtn" onclick="resetCrudForm()" style="display:none;">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Perfectly Aligned Records Table -->
+          <div style="display:flex; flex-direction:column; gap:12px; min-width: 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div style="position:relative; width:100%; max-width:320px;">
+                <input id="crudFilterInput" class="glass-input" placeholder="Search roster by name or roll..." oninput="filterCrudTable()" style="padding-left:14px;" />
+              </div>
+              <span id="crudCountBadge" style="font-size:0.75rem; color:var(--text-sec); font-family:'JetBrains Mono',monospace; font-weight:600;">
+                0 Records Shown
+              </span>
+            </div>
+
+            <div class="records-table-container">
+              <div class="table-scroll-wrap">
+                <table class="styled-records-table">
+                  <thead>
+                    <tr>
+                      <th class="col-roll">Roll</th>
+                      <th class="col-name">Student Name</th>
+                      <th class="col-avg">Average</th>
+                      <th class="col-status">Status</th>
+                      <th class="col-mentor">Mentor</th>
+                      <th class="col-actions">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="crudTableBody">
+                    <!-- Populated via renderCrudTable() -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- ====== TEACHER AUTH MODAL ====== -->
+  <div class="auth-modal-backdrop" id="authModal">
+    <div class="auth-modal">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>Faculty Authorization</h3>
+        <button onclick="closeAuthModal()" style="background:transparent; border:none; color:var(--text-sec); font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <p>Enter your Teacher Roll No / Faculty ID (T101 to T110) and Password to manage student records.</p>
+      
+      <div class="form-group">
+        <label class="form-label">Teacher Roll No / ID</label>
+        <input id="authTeacherId" class="glass-input" placeholder="e.g. T101 (or 1 to 10)" value="T101" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password (Default: 1234)</label>
+        <input id="authPassword" class="glass-input" type="password" placeholder="Enter password" value="1234" />
+      </div>
+
+      <div class="auth-error" id="authErrorMsg">Invalid Teacher Roll No or Password!</div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button class="liquid-btn liquid-btn-secondary" onclick="closeAuthModal()">Cancel</button>
+        <button class="liquid-btn" onclick="submitTeacherLogin()">Verify & Login</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. DATASETS (Roll Numbers: 1 to 78)
+    // ==========================================
+    const rawTeachersCSV = `FacultyID,FacultyName,Designation,Department,ExperienceYears,CabinLocation,EmailID
+T101,Dr. S. Ramanathan,Professor & Head,Computer Science,18,Block-A 301,ramanathan.cs@campus.edu
+T102,Dr. Meera Vasudevan,Professor,Data Science & AI,15,Block-A 304,meera.v@campus.edu
+T103,Prof. K. Soundararajan,Associate Professor,Computer Networks,12,Block-B 205,soundar.k@campus.edu
+T104,Dr. Ananya Sengupta,Associate Professor,Software Systems,11,Block-B 210,ananya.s@campus.edu
+T105,Prof. Rajesh Balakrishnan,Assistant Professor (Sr),Computer Architecture,9,Block-A 112,rajesh.b@campus.edu
+T106,Dr. Kavitha Sundaram,Assistant Professor (Sr),Cybersecurity,8,Block-C 104,kavitha.s@campus.edu
+T107,Prof. Manoj Kumar,Assistant Professor,Algorithms & DS,6,Block-C 108,manoj.k@campus.edu
+T108,Prof. Priya Chandrasekar,Assistant Professor,Machine Learning,5,Block-A 202,priya.c@campus.edu
+T109,Dr. Venkatesh Perumal,Assistant Professor,Database Engineering,7,Block-B 118,venkatesh.p@campus.edu
+T110,Prof. Deepa Harikrishnan,Assistant Professor,Cloud Computing,4,Block-C 202,deepa.h@campus.edu`;
+
+    const rawStudentsCSV = `RollNo,StudentName,Mathematics,DataStructures,ComputerNetworks,DatabaseSystems,OperatingSystems,AverageScore,ArrearsCount,NeedsMentorship,MentorID,AssignedMentorName
+1,Aarav B.,88,85,91,92,86,88.4,0,NO,T101,Dr. S. Ramanathan
+2,Aditi C.,76,82,79,85,80,80.4,0,NO,T102,Dr. Meera Vasudevan
+3,Ajay D.,84,88,82,90,78,84.4,0,NO,T103,Prof. K. Soundararajan
+4,Ananya E.,58,64,52,60,68,60.4,0,NO,T104,Dr. Ananya Sengupta
+5,Akash F.,92,90,95,94,89,92.0,0,NO,T105,Prof. Rajesh Balakrishnan
+6,Bhavna G.,32,38,48,34,54,41.2,3,YES,T106,Dr. Kavitha Sundaram
+7,Chirag H.,79,84,81,89,75,81.6,0,NO,T107,Prof. Manoj Kumar
+8,Divya I.,62,65,58,61,66,62.4,0,NO,T108,Prof. Priya Chandrasekar
+9,Dinesh J.,85,89,84,91,83,86.4,0,NO,T109,Dr. Venkatesh Perumal
+10,Deepak K.,78,80,75,82,79,78.8,0,NO,T110,Prof. Deepa Harikrishnan
+11,Esha L.,90,92,88,95,91,91.2,0,NO,T101,Dr. S. Ramanathan
+12,Gokul M.,35,34,42,30,50,38.2,3,YES,T102,Dr. Meera Vasudevan
+13,Gayatri N.,82,86,80,88,84,84.0,0,NO,T103,Prof. K. Soundararajan
+14,Hari O.,74,78,72,80,76,76.0,0,NO,T104,Dr. Ananya Sengupta
+15,Harini P.,89,91,87,93,90,90.0,0,NO,T105,Prof. Rajesh Balakrishnan
+16,Ishaan Q.,60,63,55,59,67,60.8,0,NO,T106,Dr. Kavitha Sundaram
+17,Jayesh R.,86,88,83,90,85,86.4,0,NO,T107,Prof. Manoj Kumar
+18,Janani S.,31,36,46,35,52,40.0,3,YES,T108,Prof. Priya Chandrasekar
+19,Karthik T.,77,81,76,83,78,79.0,0,NO,T109,Dr. Venkatesh Perumal
+20,Keerthana U.,64,66,60,62,68,64.0,0,NO,T110,Prof. Deepa Harikrishnan
+21,Kavya V.,91,93,89,96,92,92.2,0,NO,T101,Dr. S. Ramanathan
+22,Lokesh W.,75,79,73,81,77,77.0,0,NO,T102,Dr. Meera Vasudevan
+23,Lavanya X.,88,90,85,92,87,88.4,0,NO,T103,Prof. K. Soundararajan
+24,Manish Y.,34,32,44,38,51,39.8,3,YES,T104,Dr. Ananya Sengupta
+25,Mano Z.,83,87,81,89,84,84.8,0,NO,T105,Prof. Rajesh Balakrishnan
+26,Naveen A.,79,83,77,85,80,80.8,0,NO,T106,Dr. Kavitha Sundaram
+27,Nandhini B.,93,95,91,97,94,94.0,0,NO,T107,Prof. Manoj Kumar
+28,Nithya C.,59,65,54,58,66,60.4,0,NO,T108,Prof. Priya Chandrasekar
+29,Pranav D.,87,89,84,91,86,87.4,0,NO,T109,Dr. Venkatesh Perumal
+30,Pooja E.,33,37,45,31,53,39.8,3,YES,T110,Prof. Deepa Harikrishnan
+31,Pavithra F.,81,85,79,87,82,82.8,0,NO,T101,Dr. S. Ramanathan
+32,Rahul G.,63,67,61,63,69,64.6,0,NO,T102,Dr. Meera Vasudevan
+33,Rithanya H.,90,92,88,94,91,91.0,0,NO,T103,Prof. K. Soundararajan
+34,Rohit I.,76,80,74,82,78,78.0,0,NO,T104,Dr. Ananya Sengupta
+35,Sanjay J.,85,88,83,90,86,86.4,0,NO,T105,Prof. Rajesh Balakrishnan
+36,Sandhya K.,30,35,43,33,50,38.2,3,YES,T106,Dr. Kavitha Sundaram
+37,Sneha L.,88,91,86,93,89,89.4,0,NO,T107,Prof. Manoj Kumar
+38,Surya M.,78,82,77,84,80,80.2,0,NO,T108,Prof. Priya Chandrasekar
+39,Sathish N.,92,94,90,96,93,93.0,0,NO,T109,Dr. Venkatesh Perumal
+40,Swetha O.,61,64,57,60,67,61.8,0,NO,T110,Prof. Deepa Harikrishnan
+41,Tarun P.,84,87,82,89,85,85.4,0,NO,T101,Dr. S. Ramanathan
+42,Tejas Q.,36,33,47,36,54,41.2,3,YES,T102,Dr. Meera Vasudevan
+43,Uma R.,80,84,78,86,81,81.8,0,NO,T103,Prof. K. Soundararajan
+44,Varun S.,65,68,62,64,70,65.8,0,NO,T104,Dr. Ananya Sengupta
+45,Vignesh T.,89,92,87,94,90,90.4,0,NO,T105,Prof. Rajesh Balakrishnan
+46,Vinoth U.,75,79,73,81,76,76.8,0,NO,T106,Dr. Kavitha Sundaram
+47,Yogesh V.,87,90,85,92,88,88.4,0,NO,T107,Prof. Manoj Kumar
+48,Yamini W.,29,34,42,32,49,37.2,3,YES,T108,Prof. Priya Chandrasekar
+49,Abhishek X.,86,89,84,91,87,87.4,0,NO,T109,Dr. Venkatesh Perumal
+50,Aswin Y.,77,81,75,83,79,79.0,0,NO,T110,Prof. Deepa Harikrishnan
+51,Balaji Z.,91,93,89,95,92,92.0,0,NO,T101,Dr. S. Ramanathan
+52,Charan A.,58,62,56,59,66,60.2,0,NO,T102,Dr. Meera Vasudevan
+53,Dhruv B.,83,86,81,88,84,84.4,0,NO,T103,Prof. K. Soundararajan
+54,Gautam C.,32,37,45,34,53,40.2,3,YES,T104,Dr. Ananya Sengupta
+55,Kishore D.,88,91,86,93,89,89.4,0,NO,T105,Prof. Rajesh Balakrishnan
+56,Madhuri E.,62,66,59,61,68,63.2,0,NO,T106,Dr. Kavitha Sundaram
+57,Meenakshi F.,90,92,88,94,91,91.0,0,NO,T107,Prof. Manoj Kumar
+58,Mukund G.,74,78,72,80,75,75.8,0,NO,T108,Prof. Priya Chandrasekar
+59,Naveena H.,85,88,83,90,86,86.4,0,NO,T109,Dr. Venkatesh Perumal
+60,Parthiban I.,35,31,41,30,51,37.6,3,YES,T110,Prof. Deepa Harikrishnan
+61,Preethi J.,82,85,80,87,83,83.4,0,NO,T101,Dr. S. Ramanathan
+62,Rajesh K.,79,83,77,85,81,81.0,0,NO,T102,Dr. Meera Vasudevan
+63,Ranjith L.,93,95,91,97,94,94.0,0,NO,T103,Prof. K. Soundararajan
+64,Sabari M.,60,64,55,58,67,60.8,0,NO,T104,Dr. Ananya Sengupta
+65,Santhosh N.,87,90,85,92,88,88.4,0,NO,T105,Prof. Rajesh Balakrishnan
+66,Saravanan O.,31,36,44,33,52,39.2,3,YES,T106,Dr. Kavitha Sundaram
+67,Shalini P.,84,87,82,89,85,85.4,0,NO,T107,Prof. Manoj Kumar
+68,Siddharth Q.,66,69,63,65,71,66.8,0,NO,T108,Prof. Priya Chandrasekar
+69,Sreeja R.,89,92,87,94,90,90.4,0,NO,T109,Dr. Venkatesh Perumal
+70,Sudhir S.,76,80,74,82,77,77.8,0,NO,T110,Prof. Deepa Harikrishnan
+71,Suresh T.,91,93,89,95,92,92.0,0,NO,T101,Dr. S. Ramanathan
+72,Tamilarasan U.,33,38,46,35,50,40.4,3,YES,T102,Dr. Meera Vasudevan
+73,Tanvi V.,85,88,83,90,86,86.4,0,NO,T103,Prof. K. Soundararajan
+74,Vasanth W.,63,67,61,64,69,64.8,0,NO,T104,Dr. Ananya Sengupta
+75,Vidya X.,88,91,86,93,89,89.4,0,NO,T105,Prof. Rajesh Balakrishnan
+76,Vishnu Y.,78,82,76,84,79,79.8,0,NO,T106,Dr. Kavitha Sundaram
+77,Vivek Z.,92,94,90,96,93,93.0,0,NO,T107,Prof. Manoj Kumar
+78,Yuvan A.,30,35,43,31,48,37.4,3,YES,T108,Prof. Priya Chandrasekar`;
+
+    let studentsData = [];
+    let teachersData = [];
+    let selectedTeacherId = "T101";
+
+    // ==========================================
+    // 2. TEACHER AUTHENTICATION GATEKEEPER
+    // ==========================================
+    let currentAuthTeacher = null;
+    const DEFAULT_TEACHER_PASSWORD = "1234";
+
+    function openAuthModal() {
+      document.getElementById('authModal').classList.add('active');
+      document.getElementById('authErrorMsg').style.display = 'none';
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.remove('active');
+    }
+
+    function handleAuthBtnClick() {
+      if (currentAuthTeacher) {
+        if (confirm(`Logout from ${currentAuthTeacher.name}'s session?`)) {
+          currentAuthTeacher = null;
+          updateAuthUI();
+          switchTab('studentView', document.querySelectorAll('.tab-btn')[0]);
+        }
+      } else {
+        openAuthModal();
+      }
+    }
+
+    function submitTeacherLogin() {
+      const idInput = document.getElementById('authTeacherId').value.trim();
+      const pwdInput = document.getElementById('authPassword').value.trim();
+
+      let matched = teachersData.find(t => 
+        t.id.toLowerCase() === idInput.toLowerCase() || 
+        t.id.replace(/\D/g, '') === idInput ||
+        t.name.toLowerCase().includes(idInput.toLowerCase())
+      );
+
+      if (matched && pwdInput === DEFAULT_TEACHER_PASSWORD) {
+        currentAuthTeacher = matched;
+        selectedTeacherId = matched.id;
+        updateAuthUI();
+        closeAuthModal();
+        alert(`Welcome, ${currentAuthTeacher.name}! You now have full faculty access.`);
+        refreshAllViews();
+      } else {
+        document.getElementById('authErrorMsg').style.display = 'block';
+      }
+    }
+
+    function updateAuthUI() {
+      const btn = document.getElementById('authHeaderBtn');
+      const icon = document.getElementById('authHeaderIcon');
+      const text = document.getElementById('authHeaderText');
+
+      if (currentAuthTeacher) {
+        btn.className = 'auth-badge-btn';
+        icon.innerText = '🔓';
+        text.innerText = `${currentAuthTeacher.name.split(' ')[0]} (Logout)`;
+      } else {
+        btn.className = 'pill-btn';
+        icon.innerText = '🔒';
+        text.innerText = 'Faculty Login';
+      }
+    }
+
+    function handleProtectedTab(tabId, btnElem) {
+      if (!currentAuthTeacher) {
+        openAuthModal();
+      } else {
+        switchTab(tabId, btnElem);
+      }
+    }
+
+    // ==========================================
+    // 3. THEME CONTROLLER
+    // ==========================================
+    function toggleTheme() {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme') || 'dark';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nextTheme);
+
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+
+      if (nextTheme === 'light') {
+        icon.innerText = '🌙';
+        text.innerText = 'Night Light';
+      } else {
+        icon.innerText = '☀️';
+        text.innerText = 'Day Light';
+      }
+    }
+
+    // ==========================================
+    // 4. CSV PARSERS & DATA LOADERS
+    // ==========================================
+    function parseCSVLine(text) {
+      const result = [];
+      let cur = '';
+      let inQuote = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') { inQuote = !inQuote; }
+        else if (c === ',' && !inQuote) { result.push(cur.trim()); cur = ''; }
+        else { cur += c; }
+      }
+      result.push(cur.trim());
+      return result;
+    }
+
+    function parseTeachersCSV(csvText) {
+      const lines = csvText.trim().split(/\r?\n/);
+      const parsed = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const cols = parseCSVLine(lines[i]);
+        parsed.push({
+          id: cols[0],
+          name: cols[1],
+          designation: cols[2],
+          department: cols[3],
+          experience: parseInt(cols[4]) || 0,
+          cabin: cols[5],
+          email: cols[6]
+        });
+      }
+      return parsed;
+    }
+
+    function parseStudentsCSV(csvText) {
+      const lines = csvText.trim().split(/\r?\n/);
+      const parsed = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const cols = parseCSVLine(lines[i]);
+        const m1 = parseInt(cols[2]) || 0;
+        const m2 = parseInt(cols[3]) || 0;
+        const m3 = parseInt(cols[4]) || 0;
+        const m4 = parseInt(cols[5]) || 0;
+        const m5 = parseInt(cols[6]) || 0;
+        const avg = parseFloat(cols[7]) || Number(((m1+m2+m3+m4+m5)/5).toFixed(1));
+        const fails = parseInt(cols[8]) || [m1,m2,m3,m4,m5].filter(x => x < 40).length;
+        const needsMentorship = (cols[9] ? cols[9].toUpperCase() === 'YES' : (fails > 0 || avg < 50));
+        
+        parsed.push({
+          rollNo: cols[0],
+          name: cols[1],
+          marks: { "Mathematics": m1, "Data Structures": m2, "Computer Networks": m3, "Database Systems": m4, "Operating Systems": m5 },
+          average: avg,
+          fails: fails,
+          needsMentorship: needsMentorship,
+          mentorId: cols[10],
+          mentorName: cols[11]
+        });
+      }
+      return parsed;
+    }
+
+    async function loadDataset() {
+      teachersData = parseTeachersCSV(rawTeachersCSV);
+      studentsData = parseStudentsCSV(rawStudentsCSV);
+
+      try {
+        const studentResp = await fetch('../02-Excel-Analysis/Team06_StudentPerformance_ExcelAnalysis_Final.csv');
+        if (studentResp.ok) {
+          studentsData = parseStudentsCSV(await studentResp.text());
+        }
+      } catch (e) {}
+
+      try {
+        const teacherResp = await fetch('../02-Excel-Analysis/Team06_FacultyDirectory_ExcelAnalysis_Final.csv');
+        if (teacherResp.ok) {
+          teachersData = parseTeachersCSV(await teacherResp.text());
+        }
+      } catch (e) {}
+
+      populateMentorDropdown();
+      refreshAllViews();
+    }
+
+    function handleStudentCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        studentsData = parseStudentsCSV(e.target.result);
+        refreshAllViews();
+      };
+      reader.readAsText(file);
+    }
+
+    function handleTeacherCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        teachersData = parseTeachersCSV(e.target.result);
+        populateMentorDropdown();
+        refreshAllViews();
+      };
+      reader.readAsText(file);
+    }
+
+    function populateMentorDropdown() {
+      const sel = document.getElementById('formMentorSelect');
+      sel.innerHTML = '';
+      teachersData.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.innerText = `${t.name} (${t.department})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function refreshAllViews() {
+      let sumAvg = 0;
+      let mentorCount = 0;
+      studentsData.forEach(s => {
+        sumAvg += s.average;
+        if (s.needsMentorship) mentorCount++;
+      });
+      document.getElementById('kpiTotal').innerText = studentsData.length;
+      document.getElementById('kpiAvg').innerText = (studentsData.length ? (sumAvg / studentsData.length).toFixed(1) : 0) + '%';
+      document.getElementById('kpiMentorship').innerText = `${mentorCount} Students`;
+
+      renderTeacherSlots();
+      selectTeacherSlot(selectedTeacherId);
+      renderFacultyDirectory();
+      searchStudent();
+      renderCrudTable();
+    }
+
+    function switchTab(viewId, btnElem) {
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      btnElem.classList.add('active');
+    }
+
+    // ==========================================
+    // 5. TEACHER SLOTS & ROSTER
+    // ==========================================
+    function renderTeacherSlots() {
+      const container = document.getElementById('teacherSlotsContainer');
+      container.innerHTML = '';
+
+      teachersData.forEach((t, idx) => {
+        const slot = document.createElement('div');
+        slot.className = `teacher-slot ${t.id === selectedTeacherId ? 'active' : ''}`;
+        slot.id = `slot-${t.id}`;
+        slot.onclick = () => selectTeacherSlot(t.id);
+
+        slot.innerHTML = `
+          <div class="teacher-slot-header">
+            <span class="teacher-slot-badge">FACULTY #${idx + 1}</span>
+            <span class="teacher-slot-exp">${t.experience} Yrs</span>
+          </div>
+          <div class="teacher-slot-name">${t.name}</div>
+          <div class="teacher-slot-dept">${t.department}</div>
+        `;
+        container.appendChild(slot);
+      });
+    }
+
+    function selectTeacherSlot(teacherId) {
+      selectedTeacherId = teacherId;
+
+      document.querySelectorAll('.teacher-slot').forEach(el => el.classList.remove('active'));
+      const activeSlot = document.getElementById(`slot-${teacherId}`);
+      if (activeSlot) activeSlot.classList.add('active');
+
+      const teacher = teachersData.find(t => t.id === teacherId) || teachersData[0];
+      if (!teacher) return;
+
+      document.getElementById('tAllocName').innerText = teacher.name;
+      document.getElementById('tAllocExpBadge').innerText = `${teacher.experience} Yrs Experience`;
+      document.getElementById('tAllocMeta').innerText = `${teacher.designation} • Department of ${teacher.department}`;
+      document.getElementById('tAllocContact').innerText = `📍 Cabin: ${teacher.cabin}  |  ✉️ ${teacher.email}`;
+
+      const allocated = studentsData.filter(s => String(s.mentorId).trim() === String(teacher.id).trim() || s.mentorName === teacher.name);
+      document.getElementById('tAllocCount').innerText = `${allocated.length} Students`;
+
+      const listContainer = document.getElementById('allocatedStudentsList');
+      listContainer.innerHTML = '';
+
+      if (allocated.length === 0) {
+        listContainer.innerHTML = `<div style="padding:16px; color:var(--text-sec); font-size:0.85rem;">No students currently assigned to this mentor.</div>`;
+        return;
+      }
+
+      allocated.forEach(st => {
+        const row = document.createElement('div');
+        row.className = 'alloc-row';
+        row.innerHTML = `
+          <div>
+            <span style="font-weight:700; color:var(--text-pri)">${st.name}</span>
+            <span style="color:var(--cyan); margin-left:8px; font-family:'JetBrains Mono',monospace;">(Roll: ${st.rollNo})</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span>Average: <b>${st.average}%</b></span>
+            <span style="padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; ${st.needsMentorship ? 'background:rgba(255,82,82,0.15); color:var(--red);' : 'background:rgba(0,245,160,0.15); color:var(--green);'}">
+              ${st.needsMentorship ? '⚠️ MENTORSHIP REQUIRED' : 'NORMAL'}
+            </span>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+
+    // ==========================================
+    // 6. STUDENT LOOKUP DOSSIER
+    // ==========================================
+    function searchStudent() {
+      const query = document.getElementById('studSearchInput').value.trim().toLowerCase();
+      if (!query) return;
+
+      const student = studentsData.find(s => 
+        String(s.rollNo).trim().toLowerCase() === query || s.name.toLowerCase().includes(query)
+      );
+
+      const dossier = document.getElementById('studentDossier');
+      if (!student) {
+        dossier.style.display = 'none';
+        return;
+      }
+
+      dossier.style.display = 'grid';
+      document.getElementById('resStudName').innerText = student.name;
+      document.getElementById('resStudRoll').innerText = `ROLL NO: ${student.rollNo}`;
+      document.getElementById('resStudAvg').innerText = `${student.average}%`;
+
+      const tBody = document.getElementById('resMarksBody');
+      tBody.innerHTML = '';
+      Object.keys(student.marks).forEach(sub => {
+        const mark = student.marks[sub];
+        let grade = mark >= 85 ? 'O' : (mark >= 70 ? 'A+' : (mark >= 50 ? 'B' : (mark >= 40 ? 'C' : 'RA (Arrear)')));
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${sub}</td>
+          <td style="font-weight:700; color:${mark < 40 ? 'var(--red)' : 'var(--text-pri)'}">${mark}</td>
+          <td style="color:${mark < 40 ? 'var(--red)' : 'var(--green)'}">${grade}</td>
+        `;
+        tBody.appendChild(row);
+      });
+
+      const banner = document.getElementById('resMentorshipBanner');
+      if (student.needsMentorship) {
+        banner.className = 'status-banner status-danger';
+        banner.innerHTML = `⚠️ <b>CRITICAL MENTORSHIP REQUIRED</b> — ${student.fails} Arrear(s) / Score below 50%. Remedial counseling mandated.`;
+      } else {
+        banner.className = 'status-banner status-ok';
+        banner.innerHTML = `✅ <b>HEALTHY ACADEMIC STANDING</b> — Student does not require mandatory mentorship.`;
+      }
+
+      const mentor = teachersData.find(t => String(t.id).trim() === String(student.mentorId).trim() || t.name === student.mentorName) || {
+        name: student.mentorName || "Faculty Mentor",
+        designation: "Faculty Advisor",
+        experience: "--",
+        cabin: "Faculty Block",
+        email: "mentor@campus.edu"
+      };
+
+      document.getElementById('resFacAvatar').innerText = mentor.name.split(' ')[1]?.[0] || 'DR';
+      document.getElementById('resFacName').innerText = mentor.name;
+      document.getElementById('resFacDesig').innerText = `${mentor.designation} (${mentor.department || 'CS'})`;
+      document.getElementById('resFacExp').innerText = `${mentor.experience} Yrs Exp`;
+      document.getElementById('resFacCabin').innerText = mentor.cabin;
+      document.getElementById('resFacEmail').innerText = mentor.email;
+    }
+
+    // ==========================================
+    // 7. FACULTY DIRECTORY
+    // ==========================================
+    function renderFacultyDirectory() {
+      const grid = document.getElementById('facultyGridList');
+      grid.innerHTML = '';
+      teachersData.forEach(fac => {
+        const card = document.createElement('div');
+        card.className = 'faculty-tile';
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <h3 style="font-size:1rem; font-weight:700;">${fac.name}</h3>
+            <span class="fac-exp-tag">${fac.experience} Yrs Exp</span>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-sec);">${fac.designation}</div>
+          <div style="font-size:0.76rem; color:var(--cyan);">${fac.department}</div>
+          <div style="font-size:0.75rem; color:var(--text-sec); font-family:'JetBrains Mono',monospace;">📍 ${fac.cabin}</div>
+          <div style="font-size:0.75rem; color:var(--text-sec); font-family:'JetBrains Mono',monospace;">✉️ ${fac.email}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // 8. PROPERLY ALIGNED CRUD TABLE & FORM LOGIC
+    // =========================================================================
+    function renderCrudTable(filteredList = null) {
+      const list = filteredList || studentsData;
+      const tBody = document.getElementById('crudTableBody');
+      tBody.innerHTML = '';
+      document.getElementById('crudCountBadge').innerText = `${list.length} Records Shown`;
+
+      if (list.length === 0) {
+        tBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-sec);">No student records match your query.</td></tr>`;
+        return;
+      }
+
+      list.forEach(st => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-roll">${st.rollNo}</td>
+          <td class="col-name">${st.name}</td>
+          <td class="col-avg">${st.average}%</td>
+          <td class="col-status">
+            <span style="font-size:0.72rem; padding:3px 8px; border-radius:6px; font-weight:700; ${st.needsMentorship ? 'background:rgba(255,82,82,0.15); color:var(--red); border:1px solid rgba(255,82,82,0.3);' : 'background:rgba(0,245,160,0.15); color:var(--green); border:1px solid rgba(0,245,160,0.3);'}">
+              ${st.needsMentorship ? 'MENTORSHIP' : 'REGULAR'}
+            </span>
+          </td>
+          <td class="col-mentor" title="${st.mentorName}">${st.mentorName}</td>
+          <td class="col-actions">
+            <div class="action-group">
+              <button class="action-icon-btn" onclick="startEditStudent('${st.rollNo}')">✏️ Edit</button>
+              <button class="action-icon-btn delete-btn" onclick="deleteStudentRecord('${st.rollNo}')">🗑️ Del</button>
+            </div>
+          </td>
+        `;
+        tBody.appendChild(tr);
+      });
+    }
+
+    function filterCrudTable() {
+      const q = document.getElementById('crudFilterInput').value.trim().toLowerCase();
+      if (!q) {
+        renderCrudTable();
+        return;
+      }
+      const filtered = studentsData.filter(s => 
+        String(s.rollNo).toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+      );
+      renderCrudTable(filtered);
+    }
+
+    function saveStudentRecord() {
+      if (!currentAuthTeacher) {
+        openAuthModal();
+        return;
+      }
+
+      const rollInput = document.getElementById('formRollNo').value.trim();
+      const nameInput = document.getElementById('formName').value.trim();
+      const originalRoll = document.getElementById('editOriginalRoll').value;
+      const mentorId = document.getElementById('formMentorSelect').value;
+      const mentorObj = teachersData.find(t => t.id === mentorId) || teachersData[0];
+
+      const m1 = parseInt(document.getElementById('formM1').value) || 0;
+      const m2 = parseInt(document.getElementById('formM2').value) || 0;
+      const m3 = parseInt(document.getElementById('formM3').value) || 0;
+      const m4 = parseInt(document.getElementById('formM4').value) || 0;
+      const m5 = parseInt(document.getElementById('formM5').value) || 0;
+
+      if (!rollInput || !nameInput) {
+        alert("Please enter both Roll Number and Student Name!");
+        return;
+      }
+
+      if (originalRoll !== rollInput && studentsData.some(s => String(s.rollNo) === rollInput)) {
+        alert(`Roll Number "${rollInput}" already exists! Please use a unique roll number.`);
+        return;
+      }
+
+      const scores = [m1, m2, m3, m4, m5];
+      const avg = parseFloat((scores.reduce((a, b) => a + b, 0) / 5).toFixed(1));
+      const fails = scores.filter(x => x < 40).length;
+      const needsMentorship = (fails > 0 || avg < 50);
+
+      const record = {
+        rollNo: rollInput,
+        name: nameInput,
+        marks: {
+          "Mathematics": m1,
+          "Data Structures": m2,
+          "Computer Networks": m3,
+          "Database Systems": m4,
+          "Operating Systems": m5
+        },
+        average: avg,
+        fails: fails,
+        needsMentorship: needsMentorship,
+        mentorId: mentorObj.id,
+        mentorName: mentorObj.name
+      };
+
+      if (originalRoll) {
+        const idx = studentsData.findIndex(s => String(s.rollNo) === String(originalRoll));
+        if (idx !== -1) studentsData[idx] = record;
+      } else {
+        studentsData.push(record);
+      }
+
+      resetCrudForm();
+      refreshAllViews();
+    }
+
+    function startEditStudent(roll) {
+      if (!currentAuthTeacher) {
+        openAuthModal();
+        return;
+      }
+
+      const st = studentsData.find(s => String(s.rollNo) === String(roll));
+      if (!st) return;
+
+      document.getElementById('formModeTitle').innerText = `Edit Student`;
+      document.getElementById('editModeIndicator').style.display = 'inline-block';
+      document.getElementById('editOriginalRoll').value = st.rollNo;
+      document.getElementById('formRollNo').value = st.rollNo;
+      document.getElementById('formName').value = st.name;
+      document.getElementById('formMentorSelect').value = st.mentorId;
+      document.getElementById('formM1').value = st.marks["Mathematics"] ?? 0;
+      document.getElementById('formM2').value = st.marks["Data Structures"] ?? 0;
+      document.getElementById('formM3').value = st.marks["Computer Networks"] ?? 0;
+      document.getElementById('formM4').value = st.marks["Database Systems"] ?? 0;
+      document.getElementById('formM5').value = st.marks["Operating Systems"] ?? 0;
+
+      document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+      document.getElementById('saveStudentBtn').innerHTML = '<span>🔄</span> Update Record';
+      
+      switchTab('crudPortal', document.querySelectorAll('.tab-btn')[3]);
+    }
+
+    function deleteStudentRecord(roll) {
+      if (!currentAuthTeacher) {
+        openAuthModal();
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to remove Student Roll #${roll} from the cohort?`)) return;
+      studentsData = studentsData.filter(s => String(s.rollNo) !== String(roll));
+      
+      if (document.getElementById('editOriginalRoll').value === String(roll)) {
+        resetCrudForm();
+      }
+      refreshAllViews();
+    }
+
+    function resetCrudForm() {
+      document.getElementById('formModeTitle').innerText = 'Add New Student';
+      document.getElementById('editModeIndicator').style.display = 'none';
+      document.getElementById('editOriginalRoll').value = '';
+      document.getElementById('formRollNo').value = '';
+      document.getElementById('formName').value = '';
+      document.getElementById('formM1').value = '';
+      document.getElementById('formM2').value = '';
+      document.getElementById('formM3').value = '';
+      document.getElementById('formM4').value = '';
+      document.getElementById('formM5').value = '';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      document.getElementById('saveStudentBtn').innerHTML = '<span>💾</span> Save Record';
+    }
+
+    // ==========================================
+    // 9. CSV EXPORT
+    // ==========================================
+    function exportStudentsCSV() {
+      let csv = "RollNo,StudentName,Mathematics,DataStructures,ComputerNetworks,DatabaseSystems,OperatingSystems,AverageScore,ArrearsCount,NeedsMentorship,MentorID,AssignedMentorName\n";
+      studentsData.forEach(s => {
+        csv += `${s.rollNo},"${s.name}",${s.marks["Mathematics"]},${s.marks["Data Structures"]},${s.marks["Computer Networks"]},${s.marks["Database Systems"]},${s.marks["Operating Systems"]},${s.average},${s.fails},${s.needsMentorship ? "YES" : "NO"},${s.mentorId},"${s.mentorName}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "Team06_StudentPerformance_ExcelAnalysis_Final.csv";
+      a.click();
+    }
+
+    window.onload = loadDataset;
+  </script>
+</body>
+</html>
